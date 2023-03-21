@@ -62,7 +62,7 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "crud_solados_app",
+        "title": "Controle de estoque de solados",
         "width": 800
       }
     ]
