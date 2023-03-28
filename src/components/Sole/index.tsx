@@ -18,12 +18,30 @@ import { useState } from "react";
 import { ConfirmationModal } from "../CofirmationModal";
 import { RegisterOrderModal } from "./components/RegisterOrderModal";
 import { InputNumberSole } from "../InputNumberSole";
+import { invoke } from "@tauri-apps/api/tauri";
 
-export function Sole() {
+type SoleProps = {
+  name: string;
+  id: number;
+  refresh_soles: () => void;
+};
+
+export function Sole({ name, id, refresh_soles }: SoleProps) {
   const [restartModalOpened, setRestartModalOpened] = useState(false);
   const [sumStockModalOpened, setSumStockModalOpened] = useState(false);
   const [registerOrderModalOpened, setRegisterOrderModalOpened] =
     useState(false);
+
+  console.log(id);
+
+  const handleDelete = () => {
+    invoke("soft_delete_sole", { id })
+      .then(() => {
+        refresh_soles();
+        console.log("Solado excluido com sucesso!");
+      })
+      .catch((error) => console.log(error, "Erro ao excluir solado"));
+  };
 
   return (
     <>
@@ -31,9 +49,9 @@ export function Sole() {
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item>
             <ContainerItens>
-              <Typography>Solado X</Typography>
-              <IconButton aria-label="delete">
-                <DeleteIcon />
+              <Typography variant="h6">{name}</Typography>
+              <IconButton>
+                <DeleteIcon onClick={() => handleDelete()} />
               </IconButton>
             </ContainerItens>
           </Grid>
@@ -227,7 +245,7 @@ export function Sole() {
       <RegisterOrderModal
         open={registerOrderModalOpened}
         handleClose={() => setRegisterOrderModalOpened(false)}
-        handleConfirm={() => console.log("cadastrar solado")}
+        handleConfirm={() => console.log("cadastrar pedido")}
         handleCancel={() => setRegisterOrderModalOpened(false)}
       />
     </>

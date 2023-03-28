@@ -1,4 +1,6 @@
 import { Button, Modal, TextField, Typography } from "@mui/material";
+import { invoke } from "@tauri-apps/api";
+import { useState } from "react";
 import { ContainerItens } from "../ContainerItens";
 import { Container } from "./RegisterSoleModal.styles";
 
@@ -6,15 +8,28 @@ type RegisterSoleModalProps = {
   open: boolean;
   handleClose: () => void;
   handleCancel: () => void;
-  handleConfirm: () => void;
+  refresh_soles: () => void;
 };
 
 export function RegisterSoleModal({
   open,
   handleClose,
   handleCancel,
-  handleConfirm,
+  refresh_soles,
 }: RegisterSoleModalProps) {
+  const [soleName, setSoleName] = useState("");
+
+  const handleConfirm = () => {
+    invoke("add_new_sole", { soleName })
+      .then(() => {
+        refresh_soles();
+        console.log("Solado cadastrado com sucesso!");
+      })
+      .catch((error) => console.log(error, "Erro ao cadastrar novo solado!"));
+
+    handleClose();
+  };
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Container>
@@ -29,6 +44,7 @@ export function RegisterSoleModal({
           size="small"
           fullWidth
           sx={{ my: 1 }}
+          onChange={(event) => setSoleName(event.target.value)}
         />
 
         <ContainerItens>

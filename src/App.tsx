@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import Grid from "@mui/material/Grid";
 import { Autocomplete, Button, TextField } from "@mui/material";
@@ -7,17 +7,25 @@ import { Sole } from "./components/Sole";
 import { ContainerItens } from "./components/ContainerItens";
 import { RegisterSoleModal } from "./components/RegisterSoleModal";
 
-const options = ["Sola 1", "Sola 2"];
+type Sole = {
+  id: number;
+  name: string;
+  deleted_at?: string;
+};
 
 function App() {
-  const [value, setValue] = useState<string | null>(options[0]);
+  const [value, setValue] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [registerSoleModalOpened, setRegisterSoleModalOpened] = useState(false);
+  const [soles, setSoles] = useState<Sole[]>([]);
 
-  // async function greet() {
-  //   // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-  //   setGreetMsg(await invoke("greet", { name }));
-  // }
+  const refresh_soles = () => {
+    invoke("get_soles").then((response) => setSoles(response as Sole[]));
+  };
+
+  useEffect(() => {
+    refresh_soles();
+  }, []);
 
   return (
     <>
@@ -33,10 +41,10 @@ function App() {
               onInputChange={(event, newInputValue) => {
                 setInputValue(newInputValue);
               }}
-              options={options}
+              options={soles.map((x) => x.name)}
               sx={{ width: 300 }}
               renderInput={(params) => (
-                <TextField {...params} label="Controllable" size="small" />
+                <TextField {...params} label="Solados" size="small" />
               )}
             />
           </Grid>
@@ -61,18 +69,31 @@ function App() {
           </Grid>
         </Grid>
 
-        <Sole />
-        <Sole />
-        <Sole />
-        <Sole />
-        <Sole />
-        <Sole />
+        {value != null ? (
+          <Sole
+            key={soles.filter((x) => x.name == value)[0].id}
+            name={soles.filter((x) => x.name == value)[0].name}
+            id={soles.filter((x) => x.name == value)[0].id}
+            refresh_soles={refresh_soles}
+          />
+        ) : (
+          <>
+            {soles.map((sole) => (
+              <Sole
+                key={sole.id}
+                name={sole.name}
+                id={sole.id}
+                refresh_soles={refresh_soles}
+              />
+            ))}
+          </>
+        )}
       </Container>
       <RegisterSoleModal
         open={registerSoleModalOpened}
         handleClose={() => setRegisterSoleModalOpened(false)}
-        handleConfirm={() => console.log("cadastrar solado")}
         handleCancel={() => setRegisterSoleModalOpened(false)}
+        refresh_soles={refresh_soles}
       />
     </>
   );
