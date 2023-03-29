@@ -20,6 +20,8 @@ import { RegisterOrderModal } from "./components/RegisterOrderModal";
 import { InputNumberSole } from "../InputNumberSole";
 import { invoke } from "@tauri-apps/api/tauri";
 
+const SHOE_NUMBERING = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44];
+
 type SoleProps = {
   name: string;
   id: number;
@@ -29,10 +31,9 @@ type SoleProps = {
 export function Sole({ name, id, refresh_soles }: SoleProps) {
   const [restartModalOpened, setRestartModalOpened] = useState(false);
   const [sumStockModalOpened, setSumStockModalOpened] = useState(false);
+  const [deleteSoleModalOpened, setDeleteSoleModalOpened] = useState(false);
   const [registerOrderModalOpened, setRegisterOrderModalOpened] =
     useState(false);
-
-  console.log(id);
 
   const handleDelete = () => {
     invoke("soft_delete_sole", { id })
@@ -51,7 +52,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
             <ContainerItens>
               <Typography variant="h6">{name}</Typography>
               <IconButton>
-                <DeleteIcon onClick={() => handleDelete()} />
+                <DeleteIcon onClick={() => setDeleteSoleModalOpened(true)} />
               </IconButton>
             </ContainerItens>
           </Grid>
@@ -82,18 +83,9 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
-                <TableCell align="right">33</TableCell>
-                <TableCell align="right">34</TableCell>
-                <TableCell align="right">35</TableCell>
-                <TableCell align="right">36</TableCell>
-                <TableCell align="right">37</TableCell>
-                <TableCell align="right">38</TableCell>
-                <TableCell align="right">39</TableCell>
-                <TableCell align="right">40</TableCell>
-                <TableCell align="right">41</TableCell>
-                <TableCell align="right">42</TableCell>
-                <TableCell align="right">43</TableCell>
-                <TableCell align="right">44</TableCell>
+                {SHOE_NUMBERING.map((number) => (
+                  <TableCell align="right">{number}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -153,18 +145,9 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
-                <TableCell align="right">33</TableCell>
-                <TableCell align="right">34</TableCell>
-                <TableCell align="right">35</TableCell>
-                <TableCell align="right">36</TableCell>
-                <TableCell align="right">37</TableCell>
-                <TableCell align="right">38</TableCell>
-                <TableCell align="right">39</TableCell>
-                <TableCell align="right">40</TableCell>
-                <TableCell align="right">41</TableCell>
-                <TableCell align="right">42</TableCell>
-                <TableCell align="right">43</TableCell>
-                <TableCell align="right">44</TableCell>
+                {SHOE_NUMBERING.map((number) => (
+                  <TableCell align="right">{number}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -225,7 +208,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
       </Container>
 
       <ConfirmationModal
-        textDescription="Deseja reiniciar os pedidos do Solado X ?"
+        textDescription={`Deseja reiniciar os pedidos do solado ${name}?`}
         titleDescription="Reiniciar Pedidos"
         open={restartModalOpened}
         handleClose={() => setRestartModalOpened(false)}
@@ -234,7 +217,16 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
       />
 
       <ConfirmationModal
-        textDescription="Deseja somar ao estoque do Solado X ?"
+        textDescription={`Deseja Excluir o solado ${name}?`}
+        titleDescription="Excluir Solado"
+        open={deleteSoleModalOpened}
+        handleClose={() => setDeleteSoleModalOpened(false)}
+        handleCancel={() => setDeleteSoleModalOpened(false)}
+        handleConfirm={() => handleDelete()}
+      />
+
+      <ConfirmationModal
+        textDescription={`Deseja somar ao estoque do solado ${name}?`}
         titleDescription="Somar Estoque"
         open={sumStockModalOpened}
         handleClose={() => setSumStockModalOpened(false)}
