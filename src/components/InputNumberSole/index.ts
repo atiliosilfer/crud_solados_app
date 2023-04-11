@@ -9,5 +9,5 @@ export const InputNumberSole = styled.input`
   input[type="number"] {
     -moz-appearance: textfield;
   }
-  width: 20px;
+  width: 25px;
 `;

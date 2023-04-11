@@ -33,7 +33,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.campolinaRavia.solados",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -63,7 +63,7 @@
         "height": 600,
         "resizable": true,
         "title": "Controle de estoque de solados",
-        "width": 800
+        "width": 1000
       }
     ]
   }

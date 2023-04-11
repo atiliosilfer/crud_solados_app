@@ -5,14 +5,19 @@
 
 mod models;
 
-use models::SoleActive;
-
-use std::str::FromStr;
-use sqlx::{sqlite::{SqliteConnectOptions, SqlitePoolOptions}, SqlitePool, query, query_as};
 use chrono::Utc;
+use models::Orders;
+use models::SoleActive;
+use models::Stock;
+use sqlx::{
+    query, query_as,
+    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
+    SqlitePool,
+};
+use std::str::FromStr;
 
 struct AppState {
-    db: SqlitePool
+    db: SqlitePool,
 }
 
 #[tauri::command]
@@ -24,13 +29,14 @@ async fn add_new_sole(sole_name: &str, state: tauri::State<'_, AppState>) -> Res
         "#,
         sole_name
     )
-    .execute(&state.db).await.unwrap();
+    .execute(&state.db)
+    .await
+    .unwrap();
 
-    let max_id: Option<i64> = sqlx::query_scalar(
-        "SELECT MAX(id) FROM Sole"
-    )
-    .fetch_optional(&state.db)
-    .await.unwrap();
+    let max_id: Option<i64> = sqlx::query_scalar("SELECT MAX(id) FROM Sole")
+        .fetch_optional(&state.db)
+        .await
+        .unwrap();
 
     let sole_id = max_id.unwrap_or(0);
 
@@ -42,8 +48,10 @@ async fn add_new_sole(sole_name: &str, state: tauri::State<'_, AppState>) -> Res
             sole_id,
             size
         )
-        .execute(&state.db).await.unwrap();
-    
+        .execute(&state.db)
+        .await
+        .unwrap();
+
         query!(
             r#"
             INSERT INTO Stock (sole_id, size, amount) VALUES ($1, $2, 0)
@@ -51,7 +59,9 @@ async fn add_new_sole(sole_name: &str, state: tauri::State<'_, AppState>) -> Res
             sole_id,
             size
         )
-        .execute(&state.db).await.unwrap();
+        .execute(&state.db)
+        .await
+        .unwrap();
     }
 
     Ok(())
@@ -59,18 +69,21 @@ async fn add_new_sole(sole_name: &str, state: tauri::State<'_, AppState>) -> Res
 
 #[tauri::command]
 async fn get_soles(state: tauri::State<'_, AppState>) -> Result<Vec<SoleActive>, ()> {
-    let result = query_as!(SoleActive,
+    let result = query_as!(
+        SoleActive,
         "SELECT id, name FROM Sole where deleted_at IS NULL"
     )
-    .fetch_all(&state.db).await.unwrap();
-    
+    .fetch_all(&state.db)
+    .await
+    .unwrap();
+
     Ok(result)
 }
 
 #[tauri::command]
 async fn soft_delete_sole(id: i64, state: tauri::State<'_, AppState>) -> Result<(), ()> {
     let date_now = Utc::now();
-    
+
     query!(
         "UPDATE Sole SET deleted_at = $1 WHERE id = $2",
         date_now,
@@ -81,6 +94,30 @@ async fn soft_delete_sole(id: i64, state: tauri::State<'_, AppState>) -> Result<
     .unwrap();
 
     Ok(())
+}
+
+#[tauri::command]
+async fn get_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Orders>, ()> {
+    let result = query_as!(
+        Orders,
+        "SELECT sole_id AS \"sole_id!\", amount as \"amount!\", size as \"size!\" FROM Orders where sole_id = $1 and deleted_at IS NULL",
+        id
+    )
+    .fetch_all(&state.db)
+    .await
+    .unwrap();
+
+    Ok(result)
+}
+
+#[tauri::command]
+async fn get_stock(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Stock>, ()> {
+    let result = query_as!(Stock, "SELECT sole_id AS \"sole_id!\", amount as \"amount!\", size as \"size!\" FROM Stock where sole_id = $1", id)
+        .fetch_all(&state.db)
+        .await
+        .unwrap();
+
+    Ok(result)
 }
 
 fn main() {
@@ -95,14 +132,22 @@ fn main() {
                 .await
                 .unwrap();
 
+            sqlx::migrate!("./migrations").run(&db).await.unwrap();
+
             db
         }),
         Err(e) => panic!("error creating runtime"),
     };
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![add_new_sole, get_soles, soft_delete_sole])
-        .manage(AppState {db})
+        .invoke_handler(tauri::generate_handler![
+            add_new_sole,
+            get_soles,
+            soft_delete_sole,
+            get_orders,
+            get_stock,
+        ])
+        .manage(AppState { db })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

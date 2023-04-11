@@ -14,7 +14,13 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ContainerItens } from "../ContainerItens";
 import { Container } from "./Sole.styles";
-import { useState } from "react";
+import {
+  ChangeEvent,
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { ConfirmationModal } from "../CofirmationModal";
 import { RegisterOrderModal } from "./components/RegisterOrderModal";
 import { InputNumberSole } from "../InputNumberSole";
@@ -28,12 +34,92 @@ type SoleProps = {
   refresh_soles: () => void;
 };
 
+type Order = {
+  size: number;
+  amount: number;
+  sole_id: number;
+  deleted_at: Date | null;
+};
+
+type Stock = {
+  size: number;
+  amount: number;
+  sole_id: number;
+};
+
 export function Sole({ name, id, refresh_soles }: SoleProps) {
   const [restartModalOpened, setRestartModalOpened] = useState(false);
   const [sumStockModalOpened, setSumStockModalOpened] = useState(false);
   const [deleteSoleModalOpened, setDeleteSoleModalOpened] = useState(false);
   const [registerOrderModalOpened, setRegisterOrderModalOpened] =
     useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [stocks, setStocks] = useState<Stock[]>([]);
+  const [finalStock, setFinalStock] = useState<Stock[]>([]);
+  const [initialStockInput, setInitialStockInput] = useState<Stock[]>([]);
+
+  const restartStockInput = () => {
+    let initialStock: Stock[] = SHOE_NUMBERING.map((shoe_number) => {
+      return { size: shoe_number, amount: 0, sole_id: id };
+    });
+
+    setInitialStockInput(initialStock);
+  };
+
+  useEffect(() => {
+    const finalStock = SHOE_NUMBERING.map((size) => {
+      const stockItem = stocks.find((item) => item.size === size) || {
+        size,
+        amount: 0,
+        sole_id: 0,
+      };
+      const orderItem = orders.find(
+        (item) => item.size === size && !item.deleted_at
+      ) || { size, amount: 0, sole_id: 0 };
+
+      return {
+        size,
+        amount: stockItem.amount - orderItem.amount,
+        sole_id: stockItem.sole_id,
+      };
+    });
+
+    setFinalStock(finalStock);
+  }, [orders, stocks]);
+
+  useEffect(() => {
+    refresh_orders();
+    refresh_stocks();
+    restartStockInput();
+  }, []);
+
+  const update_stock_input = (
+    event: ChangeEvent<HTMLInputElement>,
+    size: number
+  ) => {
+    const updatedStockInput = initialStockInput.map((stockInput) =>
+      stockInput.size === size
+        ? {
+            ...stockInput,
+            amount: Number(event.target.value),
+          }
+        : stockInput
+    );
+
+    setInitialStockInput(updatedStockInput);
+  };
+
+  const refresh_orders = () => {
+    invoke("get_orders", { id }).then((response) =>
+      setOrders(response as Order[])
+    );
+  };
+
+  const refresh_stocks = () => {
+    invoke("get_orders", { id }).then((response) =>
+      setStocks(response as Stock[])
+    );
+  };
 
   const handleDelete = () => {
     invoke("soft_delete_sole", { id })
@@ -51,8 +137,8 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
           <Grid item>
             <ContainerItens>
               <Typography variant="h6">{name}</Typography>
-              <IconButton>
-                <DeleteIcon onClick={() => setDeleteSoleModalOpened(true)} />
+              <IconButton onClick={() => setDeleteSoleModalOpened(true)}>
+                <DeleteIcon />
               </IconButton>
             </ContainerItens>
           </Grid>
@@ -84,55 +170,36 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
               <TableRow>
                 <TableCell></TableCell>
                 {SHOE_NUMBERING.map((number) => (
-                  <TableCell align="right">{number}</TableCell>
+                  <TableCell key={number} align="right">
+                    {number}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 <TableCell align="right">Estoque</TableCell>
-                <TableCell align="right">1</TableCell>
-                <TableCell align="right">2</TableCell>
-                <TableCell align="right">3</TableCell>
-                <TableCell align="right">4</TableCell>
-                <TableCell align="right">5</TableCell>
-                <TableCell align="right">6</TableCell>
-                <TableCell align="right">7</TableCell>
-                <TableCell align="right">8</TableCell>
-                <TableCell align="right">9</TableCell>
-                <TableCell align="right">10</TableCell>
-                <TableCell align="right">11</TableCell>
-                <TableCell align="right">12</TableCell>
+                {stocks.map(({ size, amount }: Stock) => (
+                  <TableCell key={size} align="right">
+                    {amount}
+                  </TableCell>
+                ))}
               </TableRow>
               <TableRow>
                 <TableCell align="right">Pedidos</TableCell>
-                <TableCell align="right">1</TableCell>
-                <TableCell align="right">2</TableCell>
-                <TableCell align="right">3</TableCell>
-                <TableCell align="right">4</TableCell>
-                <TableCell align="right">5</TableCell>
-                <TableCell align="right">6</TableCell>
-                <TableCell align="right">7</TableCell>
-                <TableCell align="right">8</TableCell>
-                <TableCell align="right">9</TableCell>
-                <TableCell align="right">10</TableCell>
-                <TableCell align="right">11</TableCell>
-                <TableCell align="right">12</TableCell>
+                {orders.map(({ size, amount }: Order) => (
+                  <TableCell key={size} align="right">
+                    {amount}
+                  </TableCell>
+                ))}
               </TableRow>
               <TableRow>
                 <TableCell align="right">Final</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
-                <TableCell align="right">0</TableCell>
+                {finalStock.map(({ size, amount }: Stock) => (
+                  <TableCell key={size} align="right">
+                    {amount}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableBody>
           </Table>
@@ -146,49 +213,24 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
               <TableRow>
                 <TableCell></TableCell>
                 {SHOE_NUMBERING.map((number) => (
-                  <TableCell align="right">{number}</TableCell>
+                  <TableCell key={number} align="center">
+                    {number}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 <TableCell align="right">Estoque</TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
+                {initialStockInput.map((stockInput) => (
+                  <TableCell align="center">
+                    <InputNumberSole
+                      type="number"
+                      value={stockInput.amount}
+                      onChange={(e) => update_stock_input(e, stockInput.size)}
+                    />
+                  </TableCell>
+                ))}
               </TableRow>
             </TableBody>
           </Table>

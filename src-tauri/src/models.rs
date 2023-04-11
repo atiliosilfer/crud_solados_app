@@ -1,15 +1,29 @@
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use chrono::{NaiveDate};
 
 #[derive(Serialize, Deserialize)]
 pub struct Sole {
-  pub id: i64,
-  pub name: String,
-  pub deleted_at: Option<NaiveDate>,
+    pub id: i64,
+    pub name: String,
+    pub deleted_at: Option<NaiveDate>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct SoleActive {
-  pub id: i64,
-  pub name: String,
+    pub id: i64,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Orders {
+    pub sole_id: i64,
+    pub size: i64,
+    pub amount: i64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Stock {
+    pub sole_id: i64,
+    pub size: i64,
+    pub amount: i64,
 }
