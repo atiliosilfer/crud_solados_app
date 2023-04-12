@@ -6,7 +6,7 @@
 mod models;
 
 use chrono::Utc;
-use models::Orders;
+use models::OrderActive;
 use models::SoleActive;
 use models::Stock;
 use sqlx::{
@@ -97,9 +97,9 @@ async fn soft_delete_sole(id: i64, state: tauri::State<'_, AppState>) -> Result<
 }
 
 #[tauri::command]
-async fn get_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Orders>, ()> {
+async fn get_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<OrderActive>, ()> {
     let result = query_as!(
-        Orders,
+        OrderActive,
         "SELECT sole_id AS \"sole_id!\", amount as \"amount!\", size as \"size!\" FROM Orders where sole_id = $1 and deleted_at IS NULL",
         id
     )
@@ -111,13 +111,55 @@ async fn get_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Or
 }
 
 #[tauri::command]
-async fn get_stock(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Stock>, ()> {
+async fn get_stocks(id: i64, state: tauri::State<'_, AppState>) -> Result<Vec<Stock>, ()> {
     let result = query_as!(Stock, "SELECT sole_id AS \"sole_id!\", amount as \"amount!\", size as \"size!\" FROM Stock where sole_id = $1", id)
         .fetch_all(&state.db)
         .await
         .unwrap();
 
     Ok(result)
+}
+
+#[tauri::command]
+async fn add_sole_stock(
+    id: i64,
+    stocks: Vec<Stock>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), ()> {
+    for element in stocks.iter() {
+        query!(
+            "UPDATE Stock SET amount = COALESCE(amount, 0) + $1 WHERE sole_id = $2 and size = $3",
+            element.amount,
+            id,
+            element.size
+        )
+        .execute(&state.db)
+        .await
+        .unwrap();
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn add_sole_orders(
+    id: i64,
+    orders: Vec<OrderActive>,
+    state: tauri::State<'_, AppState>,
+) -> Result<(), ()> {
+    for element in orders.iter() {
+        query!(
+            "UPDATE Orders SET amount = COALESCE(amount, 0) + $1 WHERE sole_id = $2 and size = $3",
+            element.amount,
+            id,
+            element.size
+        )
+        .execute(&state.db)
+        .await
+        .unwrap();
+    }
+
+    Ok(())
 }
 
 fn main() {
@@ -145,7 +187,9 @@ fn main() {
             get_soles,
             soft_delete_sole,
             get_orders,
-            get_stock,
+            get_stocks,
+            add_sole_stock,
+            add_sole_orders
         ])
         .manage(AppState { db })
         .run(tauri::generate_context!())

@@ -14,19 +14,13 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ContainerItens } from "../ContainerItens";
 import { Container } from "./Sole.styles";
-import {
-  ChangeEvent,
-  ChangeEventHandler,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { ConfirmationModal } from "../CofirmationModal";
 import { RegisterOrderModal } from "./components/RegisterOrderModal";
 import { InputNumberSole } from "../InputNumberSole";
 import { invoke } from "@tauri-apps/api/tauri";
 
-const SHOE_NUMBERING = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44];
+export const SHOE_NUMBERING = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44];
 
 type SoleProps = {
   name: string;
@@ -34,7 +28,7 @@ type SoleProps = {
   refresh_soles: () => void;
 };
 
-type Order = {
+export type Order = {
   size: number;
   amount: number;
   sole_id: number;
@@ -88,12 +82,12 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
   }, [orders, stocks]);
 
   useEffect(() => {
-    refresh_orders();
-    refresh_stocks();
+    refreshOrders();
+    refreshStocks();
     restartStockInput();
   }, []);
 
-  const update_stock_input = (
+  const updateStockInput = (
     event: ChangeEvent<HTMLInputElement>,
     size: number
   ) => {
@@ -109,25 +103,34 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
     setInitialStockInput(updatedStockInput);
   };
 
-  const refresh_orders = () => {
+  const refreshOrders = () => {
     invoke("get_orders", { id }).then((response) =>
       setOrders(response as Order[])
     );
   };
 
-  const refresh_stocks = () => {
-    invoke("get_orders", { id }).then((response) =>
-      setStocks(response as Stock[])
-    );
+  const refreshStocks = () => {
+    invoke("get_stocks", { id }).then((response) => {
+      setStocks(response as Stock[]);
+    });
   };
 
   const handleDelete = () => {
     invoke("soft_delete_sole", { id })
       .then(() => {
         refresh_soles();
-        console.log("Solado excluido com sucesso!");
       })
       .catch((error) => console.log(error, "Erro ao excluir solado"));
+  };
+
+  const handleAddStocks = () => {
+    invoke("add_sole_stock", { stocks: initialStockInput, id })
+      .then(() => {
+        refreshStocks();
+        restartStockInput();
+        setSumStockModalOpened(false);
+      })
+      .catch((error) => console.log(error, "Erro ao adicionar solado"));
   };
 
   return (
@@ -223,11 +226,11 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
               <TableRow>
                 <TableCell align="right">Estoque</TableCell>
                 {initialStockInput.map((stockInput) => (
-                  <TableCell align="center">
+                  <TableCell key={stockInput.size} align="center">
                     <InputNumberSole
                       type="number"
                       value={stockInput.amount}
-                      onChange={(e) => update_stock_input(e, stockInput.size)}
+                      onChange={(e) => updateStockInput(e, stockInput.size)}
                     />
                   </TableCell>
                 ))}
@@ -273,14 +276,15 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         open={sumStockModalOpened}
         handleClose={() => setSumStockModalOpened(false)}
         handleCancel={() => setSumStockModalOpened(false)}
-        handleConfirm={() => console.log("Confirm")}
+        handleConfirm={handleAddStocks}
       />
 
       <RegisterOrderModal
         open={registerOrderModalOpened}
         handleClose={() => setRegisterOrderModalOpened(false)}
-        handleConfirm={() => console.log("cadastrar pedido")}
+        refreshOrders={refreshOrders}
         handleCancel={() => setRegisterOrderModalOpened(false)}
+        soleId={id}
       />
     </>
   );

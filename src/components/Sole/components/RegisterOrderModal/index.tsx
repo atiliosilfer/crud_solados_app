@@ -7,26 +7,75 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import { ContainerItens } from "../../../ContainerItens";
 import { InputNumberSole } from "../../../InputNumberSole";
 import { Container } from "./RegisterOrderModal.styles";
+import { Order, SHOE_NUMBERING } from "../..";
+import { ChangeEvent, useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/tauri";
 
 type RegisterOrderModalProps = {
   open: boolean;
   handleClose: () => void;
   handleCancel: () => void;
-  handleConfirm: () => void;
+  refreshOrders: () => void;
+  soleId: number;
 };
 
 export function RegisterOrderModal({
   open,
   handleClose,
   handleCancel,
-  handleConfirm,
+  soleId,
+  refreshOrders,
 }: RegisterOrderModalProps) {
+  const [initialOrdersInput, setInitialOrdersInput] = useState<Order[]>([]);
+
+  const restartOrderInput = () => {
+    let initialOrder: Order[] = SHOE_NUMBERING.map((shoeNumber) => {
+      return {
+        size: shoeNumber,
+        amount: 0,
+        sole_id: soleId,
+        deleted_at: null,
+      };
+    });
+
+    setInitialOrdersInput(initialOrder);
+  };
+
+  useEffect(() => {
+    restartOrderInput();
+  }, []);
+
+  const updateOrdersInput = (
+    event: ChangeEvent<HTMLInputElement>,
+    size: number
+  ) => {
+    const updatedOrderInput = initialOrdersInput.map((orderInput) =>
+      orderInput.size === size
+        ? {
+            ...orderInput,
+            amount: Number(event.target.value),
+          }
+        : orderInput
+    );
+
+    setInitialOrdersInput(updatedOrderInput);
+  };
+
+  const handleAddOrders = () => {
+    invoke("add_sole_orders", { orders: initialOrdersInput, id: soleId })
+      .then(() => {
+        refreshOrders();
+        restartOrderInput();
+        handleClose();
+      })
+      .catch((error) => console.log(error, "Erro ao adicionar pedido"));
+  };
+
   return (
     <Modal open={open} onClose={handleClose}>
       <Container>
@@ -39,59 +88,25 @@ export function RegisterOrderModal({
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
-                <TableCell align="right">33</TableCell>
-                <TableCell align="right">34</TableCell>
-                <TableCell align="right">35</TableCell>
-                <TableCell align="right">36</TableCell>
-                <TableCell align="right">37</TableCell>
-                <TableCell align="right">38</TableCell>
-                <TableCell align="right">39</TableCell>
-                <TableCell align="right">40</TableCell>
-                <TableCell align="right">41</TableCell>
-                <TableCell align="right">42</TableCell>
-                <TableCell align="right">43</TableCell>
-                <TableCell align="right">44</TableCell>
+                {SHOE_NUMBERING.map((number) => (
+                  <TableCell key={number} align="center">
+                    {number}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 <TableCell align="right">Estoque</TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
-                <TableCell align="right">
-                  <InputNumberSole type="number" />
-                </TableCell>
+                {initialOrdersInput.map((orderInput) => (
+                  <TableCell key={orderInput.size} align="center">
+                    <InputNumberSole
+                      type="number"
+                      value={orderInput.amount}
+                      onChange={(e) => updateOrdersInput(e, orderInput.size)}
+                    />
+                  </TableCell>
+                ))}
               </TableRow>
             </TableBody>
           </Table>
@@ -110,7 +125,7 @@ export function RegisterOrderModal({
             variant="contained"
             size="small"
             sx={{ textTransform: "none" }}
-            onClick={() => handleConfirm()}
+            onClick={handleAddOrders}
           >
             Cadastrar
           </Button>
