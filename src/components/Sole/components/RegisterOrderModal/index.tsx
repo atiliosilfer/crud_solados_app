@@ -97,7 +97,7 @@ export function RegisterOrderModal({
             </TableHead>
             <TableBody>
               <TableRow>
-                <TableCell align="right">Estoque</TableCell>
+                <TableCell align="right">Pedidos</TableCell>
                 {initialOrdersInput.map((orderInput) => (
                   <TableCell key={orderInput.size} align="center">
                     <InputNumberSole

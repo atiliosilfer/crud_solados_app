@@ -133,6 +133,17 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
       .catch((error) => console.log(error, "Erro ao adicionar solado"));
   };
 
+  const handleResetOrders = () => {
+    invoke("reset_orders", { id })
+      .then(() => {
+        refreshStocks();
+        refreshOrders();
+        restartStockInput();
+        setRestartModalOpened(false);
+      })
+      .catch((error) => console.log(error, "Erro ao reiniciar pedidos"));
+  };
+
   return (
     <>
       <Container>
@@ -258,7 +269,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         open={restartModalOpened}
         handleClose={() => setRestartModalOpened(false)}
         handleCancel={() => setRestartModalOpened(false)}
-        handleConfirm={() => console.log("Confirm")}
+        handleConfirm={handleResetOrders}
       />
 
       <ConfirmationModal
@@ -267,7 +278,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         open={deleteSoleModalOpened}
         handleClose={() => setDeleteSoleModalOpened(false)}
         handleCancel={() => setDeleteSoleModalOpened(false)}
-        handleConfirm={() => handleDelete()}
+        handleConfirm={handleDelete}
       />
 
       <ConfirmationModal
