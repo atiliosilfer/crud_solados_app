@@ -12,9 +12,10 @@ import {
 import { ContainerItens } from "../../../ContainerItens";
 import { InputNumberSole } from "../../../InputNumberSole";
 import { Container } from "./RegisterOrderModal.styles";
-import { Order, SHOE_NUMBERING } from "../..";
 import { ChangeEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import { SHOE_NUMBERING } from "../../../../constants";
+import { Order } from "../../../../types";
 
 type RegisterOrderModalProps = {
   open: boolean;
@@ -34,7 +35,7 @@ export function RegisterOrderModal({
   const [initialOrdersInput, setInitialOrdersInput] = useState<Order[]>([]);
 
   const restartOrderInput = () => {
-    let initialOrder: Order[] = SHOE_NUMBERING.map((shoeNumber) => {
+    let initialOrder: Order[] = SHOE_NUMBERING.map((shoeNumber: number) => {
       return {
         size: shoeNumber,
         amount: 0,
@@ -50,10 +51,7 @@ export function RegisterOrderModal({
     restartOrderInput();
   }, []);
 
-  const updateOrdersInput = (
-    event: ChangeEvent<HTMLInputElement>,
-    size: number
-  ) => {
+  const updateOrdersInput = (event: ChangeEvent<HTMLInputElement>, size: number) => {
     const updatedOrderInput = initialOrdersInput.map((orderInput) =>
       orderInput.size === size
         ? {
@@ -73,7 +71,7 @@ export function RegisterOrderModal({
         restartOrderInput();
         handleClose();
       })
-      .catch((error) => console.log(error, "Erro ao adicionar pedido"));
+      .catch((error) => alert("Erro ao adicionar pedido: " + error));
   };
 
   return (
@@ -88,9 +86,9 @@ export function RegisterOrderModal({
             <TableHead>
               <TableRow>
                 <TableCell></TableCell>
-                {SHOE_NUMBERING.map((number) => (
-                  <TableCell key={number} align="center">
-                    {number}
+                {SHOE_NUMBERING.map((shoeNumber: number) => (
+                  <TableCell key={shoeNumber} align="center">
+                    {shoeNumber}
                   </TableCell>
                 ))}
               </TableRow>
@@ -113,20 +111,10 @@ export function RegisterOrderModal({
         </TableContainer>
 
         <ContainerItens>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={() => handleCancel()}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={handleAddOrders}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleAddOrders}>
             Cadastrar
           </Button>
         </ContainerItens>

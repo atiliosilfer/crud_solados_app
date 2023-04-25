@@ -30,20 +30,10 @@ export function ConfirmationModal({
         <br />
 
         <ContainerItens>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={() => handleCancel()}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={() => handleConfirm()}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleConfirm}>
             Confirmar
           </Button>
         </ContainerItens>

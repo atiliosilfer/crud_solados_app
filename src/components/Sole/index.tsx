@@ -8,53 +8,38 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ContainerItens } from "../ContainerItens";
-import { Container } from "./Sole.styles";
+import { Container } from "./SoleContainer.styles";
 import { ChangeEvent, useEffect, useState } from "react";
 import { ConfirmationModal } from "../CofirmationModal";
 import { RegisterOrderModal } from "./components/RegisterOrderModal";
 import { InputNumberSole } from "../InputNumberSole";
 import { invoke } from "@tauri-apps/api/tauri";
+import { Order, Stock } from "../../types";
+import { SHOE_NUMBERING } from "../../constants";
 
-export const SHOE_NUMBERING = [33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44];
-
-type SoleProps = {
+type SoleContainerProps = {
   name: string;
   id: number;
-  refresh_soles: () => void;
+  refreshSoles: () => void;
 };
 
-export type Order = {
-  size: number;
-  amount: number;
-  sole_id: number;
-  deleted_at: Date | null;
-};
-
-type Stock = {
-  size: number;
-  amount: number;
-  sole_id: number;
-};
-
-export function Sole({ name, id, refresh_soles }: SoleProps) {
+export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
   const [restartModalOpened, setRestartModalOpened] = useState(false);
   const [sumStockModalOpened, setSumStockModalOpened] = useState(false);
   const [deleteSoleModalOpened, setDeleteSoleModalOpened] = useState(false);
-  const [registerOrderModalOpened, setRegisterOrderModalOpened] =
-    useState(false);
+  const [registerOrderModalOpened, setRegisterOrderModalOpened] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [finalStock, setFinalStock] = useState<Stock[]>([]);
   const [initialStockInput, setInitialStockInput] = useState<Stock[]>([]);
 
   const restartStockInput = () => {
-    let initialStock: Stock[] = SHOE_NUMBERING.map((shoe_number) => {
-      return { size: shoe_number, amount: 0, sole_id: id };
+    let initialStock: Stock[] = SHOE_NUMBERING.map((shoeNumber) => {
+      return { size: shoeNumber, amount: 0, sole_id: id };
     });
 
     setInitialStockInput(initialStock);
@@ -67,9 +52,11 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         amount: 0,
         sole_id: 0,
       };
-      const orderItem = orders.find(
-        (item) => item.size === size && !item.deleted_at
-      ) || { size, amount: 0, sole_id: 0 };
+      const orderItem = orders.find((item) => item.size === size && !item.deleted_at) || {
+        size,
+        amount: 0,
+        sole_id: 0,
+      };
 
       return {
         size,
@@ -87,10 +74,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
     restartStockInput();
   }, []);
 
-  const updateStockInput = (
-    event: ChangeEvent<HTMLInputElement>,
-    size: number
-  ) => {
+  const updateStockInput = (event: ChangeEvent<HTMLInputElement>, size: number) => {
     const updatedStockInput = initialStockInput.map((stockInput) =>
       stockInput.size === size
         ? {
@@ -104,9 +88,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
   };
 
   const refreshOrders = () => {
-    invoke("get_orders", { id }).then((response) =>
-      setOrders(response as Order[])
-    );
+    invoke("get_orders", { id }).then((response) => setOrders(response as Order[]));
   };
 
   const refreshStocks = () => {
@@ -118,9 +100,9 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
   const handleDelete = () => {
     invoke("soft_delete_sole", { id })
       .then(() => {
-        refresh_soles();
+        refreshSoles();
       })
-      .catch((error) => console.log(error, "Erro ao excluir solado"));
+      .catch((error) => alert("Erro ao excluir solado: " + error));
   };
 
   const handleAddStocks = () => {
@@ -130,7 +112,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         restartStockInput();
         setSumStockModalOpened(false);
       })
-      .catch((error) => console.log(error, "Erro ao adicionar solado"));
+      .catch((error) => alert("Erro ao adicionar solado: " + error));
   };
 
   const handleResetOrders = () => {
@@ -141,7 +123,7 @@ export function Sole({ name, id, refresh_soles }: SoleProps) {
         restartStockInput();
         setRestartModalOpened(false);
       })
-      .catch((error) => console.log(error, "Erro ao reiniciar pedidos"));
+      .catch((error) => alert("Erro ao reiniciar pedidos: " + error));
   };
 
   return (

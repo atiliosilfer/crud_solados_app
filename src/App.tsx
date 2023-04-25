@@ -3,28 +3,23 @@ import { invoke } from "@tauri-apps/api/tauri";
 import Grid from "@mui/material/Grid";
 import { Autocomplete, Button, TextField } from "@mui/material";
 import { Container } from "./styles";
-import { Sole } from "./components/Sole";
+import { SoleContainer } from "./components/Sole";
 import { ContainerItens } from "./components/ContainerItens";
 import { RegisterSoleModal } from "./components/RegisterSoleModal";
+import { Sole } from "./types";
 
-type Sole = {
-  id: number;
-  name: string;
-  deleted_at?: string;
-};
-
-function App() {
+export function App() {
   const [value, setValue] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [registerSoleModalOpened, setRegisterSoleModalOpened] = useState(false);
   const [soles, setSoles] = useState<Sole[]>([]);
 
-  const refresh_soles = () => {
+  const refreshSoles = () => {
     invoke("get_soles").then((response) => setSoles(response as Sole[]));
   };
 
   useEffect(() => {
-    refresh_soles();
+    refreshSoles();
   }, []);
 
   return (
@@ -43,18 +38,12 @@ function App() {
               }}
               options={soles.map((x) => x.name)}
               sx={{ width: 300 }}
-              renderInput={(params) => (
-                <TextField {...params} label="Solados" size="small" />
-              )}
+              renderInput={(params) => <TextField {...params} label="Solados" size="small" />}
             />
           </Grid>
           <Grid item>
             <ContainerItens>
-              <Button
-                variant="contained"
-                size="small"
-                sx={{ textTransform: "none" }}
-              >
+              <Button variant="contained" size="small" sx={{ textTransform: "none" }}>
                 Imprimir
               </Button>
               <Button
@@ -70,21 +59,16 @@ function App() {
         </Grid>
 
         {value != null ? (
-          <Sole
+          <SoleContainer
             key={soles.filter((x) => x.name == value)[0].id}
             name={soles.filter((x) => x.name == value)[0].name}
             id={soles.filter((x) => x.name == value)[0].id}
-            refresh_soles={refresh_soles}
+            refreshSoles={refreshSoles}
           />
         ) : (
           <>
             {soles.map((sole) => (
-              <Sole
-                key={sole.id}
-                name={sole.name}
-                id={sole.id}
-                refresh_soles={refresh_soles}
-              />
+              <SoleContainer key={sole.id} name={sole.name} id={sole.id} refreshSoles={refreshSoles} />
             ))}
           </>
         )}
@@ -93,10 +77,8 @@ function App() {
         open={registerSoleModalOpened}
         handleClose={() => setRegisterSoleModalOpened(false)}
         handleCancel={() => setRegisterSoleModalOpened(false)}
-        refresh_soles={refresh_soles}
+        refreshSoles={refreshSoles}
       />
     </>
   );
 }
-
-export default App;

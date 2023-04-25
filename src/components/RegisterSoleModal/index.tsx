@@ -8,24 +8,18 @@ type RegisterSoleModalProps = {
   open: boolean;
   handleClose: () => void;
   handleCancel: () => void;
-  refresh_soles: () => void;
+  refreshSoles: () => void;
 };
 
-export function RegisterSoleModal({
-  open,
-  handleClose,
-  handleCancel,
-  refresh_soles,
-}: RegisterSoleModalProps) {
+export function RegisterSoleModal({ open, handleClose, handleCancel, refreshSoles }: RegisterSoleModalProps) {
   const [soleName, setSoleName] = useState("");
 
   const handleConfirm = () => {
     invoke("add_new_sole", { soleName })
       .then(() => {
-        refresh_soles();
-        console.log("Solado cadastrado com sucesso!");
+        refreshSoles();
       })
-      .catch((error) => console.log(error, "Erro ao cadastrar novo solado!"));
+      .catch((error) => alert("Erro ao cadastrar novo solado: " + error));
 
     handleClose();
   };
@@ -48,20 +42,10 @@ export function RegisterSoleModal({
         />
 
         <ContainerItens>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={() => handleCancel()}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleCancel}>
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            size="small"
-            sx={{ textTransform: "none" }}
-            onClick={() => handleConfirm()}
-          >
+          <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={handleConfirm}>
             Cadastrar
           </Button>
         </ContainerItens>
