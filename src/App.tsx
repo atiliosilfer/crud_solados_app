@@ -7,6 +7,10 @@ import { SoleContainer } from "./components/Sole";
 import { ContainerItens } from "./components/ContainerItens";
 import { RegisterSoleModal } from "./components/RegisterSoleModal";
 import { Sole } from "./types";
+import { generatePdfData, generatePdfFile } from "./utils/pdfUtils";
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export function App() {
   const [value, setValue] = useState<string | null>(null);
@@ -14,13 +18,18 @@ export function App() {
   const [registerSoleModalOpened, setRegisterSoleModalOpened] = useState(false);
   const [soles, setSoles] = useState<Sole[]>([]);
 
+  useEffect(() => {
+    refreshSoles();
+  }, []);
+
   const refreshSoles = () => {
     invoke("get_soles").then((response) => setSoles(response as Sole[]));
   };
 
-  useEffect(() => {
-    refreshSoles();
-  }, []);
+  async function printDocument() {
+    const data = generatePdfData(soles);
+    generatePdfFile(await data);
+  }
 
   return (
     <>
@@ -43,7 +52,7 @@ export function App() {
           </Grid>
           <Grid item>
             <ContainerItens>
-              <Button variant="contained" size="small" sx={{ textTransform: "none" }}>
+              <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={printDocument}>
                 Imprimir
               </Button>
               <Button

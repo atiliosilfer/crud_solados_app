@@ -16,3 +16,10 @@ export type Sole = {
   name: string;
   deleted_at?: string;
 };
+
+export type PdfData = {
+  soleId: number;
+  soleName: string;
+  orders: Order[];
+  stocks: Stock[];
+};
