@@ -60,8 +60,14 @@ export function generatePdfFile(data: PdfData[]) {
     ];
   });
 
+  const date = new Date();
+
+  const header = [`Solados - ${date}`, " "];
+
+  const content = header.concat(contentData as any);
+
   const file = {
-    content: contentData.flat(),
+    content: content.flat(),
   };
 
   pdfMake.createPdf(file).open({}, window.open("", "_blank"));
