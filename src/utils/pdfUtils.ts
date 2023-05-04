@@ -1,7 +1,9 @@
-import pdfMake from "pdfmake/build/pdfmake";
 import { Order, Sole, Stock, PdfData } from "../types";
 import { invoke } from "@tauri-apps/api/tauri";
 import { SHOE_NUMBERING } from "../constants";
+import pdfmake from "pdfmake/build/pdfmake";
+import pdfFonts from "./vfs_fonts";
+pdfmake.vfs = pdfFonts;
 
 export async function generatePdfData(soles: Sole[]): Promise<PdfData[]> {
   const pdfDataPromises: Promise<PdfData>[] = soles.map(async (sole) => {
@@ -70,7 +72,7 @@ export function generatePdfFile(data: PdfData[]) {
     content: content.flat(),
   };
 
-  pdfMake.createPdf(file).open({}, window.open("", "_blank"));
+  pdfmake.createPdf(file).open({}, window.open("", "_blank"));
 }
 
 function findAmountBySize(arr: { size: number; amount: number }[], size: number): number {

@@ -8,9 +8,6 @@ import { ContainerItens } from "./components/ContainerItens";
 import { RegisterSoleModal } from "./components/RegisterSoleModal";
 import { Sole } from "./types";
 import { generatePdfData, generatePdfFile } from "./utils/pdfUtils";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export function App() {
   const [value, setValue] = useState<string | null>(null);
