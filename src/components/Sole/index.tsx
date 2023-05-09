@@ -190,7 +190,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                 ))}
               </TableRow>
               <TableRow>
-                <TableCell align="right">Final</TableCell>
+                <TableCell align="right">Estoque Final</TableCell>
                 {finalStock.map(({ size, amount }: Stock) => (
                   <TableCell key={size} align="right">
                     {amount}

@@ -25,48 +25,67 @@ export async function generatePdfData(soles: Sole[]): Promise<PdfData[]> {
 export function generatePdfFile(data: PdfData[]) {
   const contentData = data.map((data) => {
     const header = SHOE_NUMBERING.map((size) => ({
-      text: size,
+      text: size.toString(),
       bold: true,
     }));
+
+    header.push({ text: "Total", bold: true });
 
     const stockRows = SHOE_NUMBERING.map((size) => ({
       text: findAmountBySize(data.stocks, size),
     }));
 
+    stockRows.push({ text: findSumAmount(data.stocks) });
+
     const orderRows = SHOE_NUMBERING.map((size) => ({
       text: findAmountBySize(data.orders, size),
     }));
+
+    orderRows.push({ text: findSumAmount(data.orders) });
 
     const finalRows = SHOE_NUMBERING.map((size) => ({
       text: findAmountBySize(data.stocks, size) - findAmountBySize(data.orders, size),
     }));
 
+    finalRows.push({ text: findSumAmount(data.stocks) - findSumAmount(data.orders) });
+
     return [
-      { text: data.soleName, bold: true },
       {
-        layout: "lightHorizontalLines",
         table: {
           headerRows: 1,
-          widths: [50, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+          widths: [75, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 30],
 
           body: [
-            [" ", ...header],
+            [{ text: data.soleName, bold: true }, ...header],
             [{ text: "Estoque", bold: true }, ...stockRows],
             [{ text: "Pedidos", bold: true }, ...orderRows],
-            [{ text: "Final", bold: true }, ...finalRows],
+            [{ text: "Estoque Final", bold: true }, ...finalRows],
           ],
         },
       },
-      "___________________________________________________________________________________________",
       " ",
     ];
   });
 
   const date = new Date();
+  const options: Intl.DateTimeFormatOptions = {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  };
+  const dateHeader: string = date.toLocaleString("pt-BR", options);
 
-  const header = [`Solados - ${date}`, " "];
+  const header = [`Relatórios de solados - ${dateHeader}`, " "];
 
-  const content = header.concat(contentData as any);
+  const footer = [
+    " ",
+    `Total das fichas: ${sumTotalAmountOrder(data)} pares`,
+    `Total do estoque final: ${sumTotalAmountStock(data) - sumTotalAmountOrder(data)} pares`,
+  ];
+
+  const content = header.concat(contentData as any).concat(footer);
 
   const file = {
     content: content.flat(),
@@ -78,4 +97,36 @@ export function generatePdfFile(data: PdfData[]) {
 function findAmountBySize(arr: { size: number; amount: number }[], size: number): number {
   const item = arr.find((x) => x.size === size);
   return item ? item.amount : 0;
+}
+
+function findSumAmount(arr: { amount: number }[]): number {
+  return arr.reduce((acc, order) => acc + order.amount, 0);
+}
+
+function sumAmountOrder(orders: Order[]): number {
+  return orders.reduce((acc, order) => acc + order.amount, 0);
+}
+
+function sumTotalAmountOrder(pdfDataArray: PdfData[]): number {
+  let sumAmounts: number = 0;
+
+  for (const pdfData of pdfDataArray) {
+    const orders = pdfData.orders;
+    const sumOrdersAmounts: number = orders.reduce((acc, order) => acc + order.amount, 0);
+    sumAmounts += sumOrdersAmounts;
+  }
+
+  return sumAmounts;
+}
+
+function sumTotalAmountStock(pdfDataArray: PdfData[]): number {
+  let sumAmounts: number = 0;
+
+  for (const pdfData of pdfDataArray) {
+    const stocks = pdfData.stocks;
+    const sumOrdersAmounts: number = stocks.reduce((acc, stock) => acc + stock.amount, 0);
+    sumAmounts += sumOrdersAmounts;
+  }
+
+  return sumAmounts;
 }
