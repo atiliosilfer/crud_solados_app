@@ -9,7 +9,9 @@ export const Container = styled.div`
   text-align: center;
 `;
 
-export const ContainerButtons = styled.div`
+export const ContainerLoading = styled.div`
   display: flex;
-  gap: 4px;
+  justify-content: center;
+  text-align: center;
+  padding-top: 16px;
 `;
