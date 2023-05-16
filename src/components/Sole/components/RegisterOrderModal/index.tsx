@@ -91,6 +91,7 @@ export function RegisterOrderModal({
                     {shoeNumber}
                   </TableCell>
                 ))}
+                <TableCell align="center">Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -105,6 +106,7 @@ export function RegisterOrderModal({
                     />
                   </TableCell>
                 ))}
+                <TableCell align="center">{initialOrdersInput.reduce((acc, order) => acc + order.amount, 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

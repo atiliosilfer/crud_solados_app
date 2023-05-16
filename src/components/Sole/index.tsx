@@ -170,6 +170,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     {number}
                   </TableCell>
                 ))}
+                <TableCell align="center">Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -180,6 +181,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     {amount}
                   </TableCell>
                 ))}
+                <TableCell align="center">{stocks.reduce((acc, stock) => acc + stock.amount, 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="right">Pedidos</TableCell>
@@ -188,6 +190,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     {amount}
                   </TableCell>
                 ))}
+                <TableCell align="center">{orders.reduce((acc, order) => acc + order.amount, 0)}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell align="right">Estoque Final</TableCell>
@@ -196,6 +199,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     {amount}
                   </TableCell>
                 ))}
+                <TableCell align="center">{finalStock.reduce((acc, stock) => acc + stock.amount, 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -213,6 +217,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     {number}
                   </TableCell>
                 ))}
+                <TableCell>Total</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -227,6 +232,7 @@ export function SoleContainer({ name, id, refreshSoles }: SoleContainerProps) {
                     />
                   </TableCell>
                 ))}
+                <TableCell align="center">{initialStockInput.reduce((acc, stock) => acc + stock.amount, 0)}</TableCell>
               </TableRow>
             </TableBody>
           </Table>

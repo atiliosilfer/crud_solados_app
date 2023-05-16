@@ -27,16 +27,20 @@ export function App() {
   };
 
   const handleResetAllOrders = () => {
-    soles.map(async (sole) => await invoke("reset_orders", { id: sole.id }));
+    setLoading(true);
+
+    soles.map(async (sole) => {
+      console.log(sole.id, sole);
+      await invoke("reset_orders", { id: sole.id });
+    });
     setSoles([]);
     setResetAllOrdersModalOpened(false);
 
-    setLoading(true);
     refreshSoles();
 
     setTimeout(() => {
       setLoading(false);
-    }, 5000);
+    }, 8000);
   };
 
   async function printDocument() {
