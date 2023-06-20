@@ -9,7 +9,8 @@ Essas instruções permitirão que você obtenha uma cópia do projeto em opera�
 
 ### 📋 Pré-requisitos
 
-Para iniciar o projeto é necessário ter o [Node.js](https://nodejs.org/en) instalado em sua maquina! Recomendado a versão LTS
+Para iniciar o projeto é necessário ter o [Node.js](https://nodejs.org/en) instalado em sua maquina! Recomendado a versão LTS 
+
 E também precisamos do [RUST](https://www.rust-lang.org/pt-BR/learn/get-started) 
 
 ### 🔧 Instalação
