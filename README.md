@@ -59,7 +59,7 @@ Após o build o executavel estara na pasta do seu projeto
 
 O projeto tem essa aparencia :D
 
-![image](https://github.com/atiliosilfer/crud_solados_app/assets/42559266/585d54fe-f8fb-479a-9f53-1bf5ef12f8e9)
+![image](https://github.com/atiliosilfer/crud_solados_app/assets/42559266/03474400-6d8c-4dea-897f-579e3d0677af)
 
 ## 🛠️ Construído com
 
