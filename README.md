@@ -21,7 +21,25 @@ Após clonar esse repositório para rodar o projeto como desenvolvimento vá at�
 npm install
 ```
 
-E para iniciar o projeto basta rodar o comando abaixo:
+Agora devemos criar o banco de dados, então vamos entrar na pasta src-tauri pelo terminal:
+
+```
+cd src-tauri/
+```
+
+e vamos criar o banco de dados, para isso rodamos o seguinte comando:
+
+```
+sqlx database create
+```
+
+após a criação do banco de dados, precisamos rodar as migrations para montar a estrutura inicial do banco
+
+```
+sqlx migrate run
+```
+
+E agora para iniciar o projeto basta rodar o comando abaixo:
 
 ```
 npm run tauri dev
