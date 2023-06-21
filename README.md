@@ -57,6 +57,10 @@ Após o build o executavel estara na pasta do seu projeto
   ...\src-tauri\target\release\bundle/msi/
 ```
 
+O projeto tem essa aparencia :D
+
+![image](https://github.com/atiliosilfer/crud_solados_app/assets/42559266/585d54fe-f8fb-479a-9f53-1bf5ef12f8e9)
+
 ## 🛠️ Construído com
 
 Mencione as ferramentas que você usou para criar seu projeto
