@@ -26,21 +26,17 @@ export function App() {
     invoke("get_soles").then((response) => setSoles(response as Sole[]));
   };
 
-  const handleResetAllOrders = () => {
+  const handleResetAllOrders = async () => {
     setLoading(true);
-
-    soles.map(async (sole) => {
-      console.log(sole.id, sole);
-      await invoke("reset_orders", { id: sole.id });
-    });
     setSoles([]);
     setResetAllOrdersModalOpened(false);
 
+    for (const sole of soles) {
+      await invoke("reset_orders", { id: sole.id });
+    }
+    
     refreshSoles();
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 8000);
+    setLoading(false);
   };
 
   async function printDocument() {
@@ -75,7 +71,7 @@ export function App() {
                 sx={{ textTransform: "none" }}
                 onClick={() => setResetAllOrdersModalOpened(true)}
               >
-                Reinicial todos os pedidos
+                Reiniciar todos os pedidos
               </Button>
               <Button variant="contained" size="small" sx={{ textTransform: "none" }} onClick={printDocument}>
                 Imprimir

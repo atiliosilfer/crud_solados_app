@@ -58,6 +58,8 @@ pub async fn reset_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<
         .unwrap();
     }
 
+    println!("update stock {}", id);
+
     let date_now = Utc::now();
 
     query!(
@@ -68,6 +70,8 @@ pub async fn reset_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<
     .execute(&state.db)
     .await
     .unwrap();
+
+    println!("soft delete Orders {}", id);
 
     for size in 33..=44 {
         query!(
@@ -81,6 +85,8 @@ pub async fn reset_orders(id: i64, state: tauri::State<'_, AppState>) -> Result<
         .await
         .unwrap();
     }
+
+    println!("insert Orders {}", id);
 
     Ok(())
 }
