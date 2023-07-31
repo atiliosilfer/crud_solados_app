@@ -10,12 +10,22 @@ import { Sole } from "./types";
 import { generatePdfData, generatePdfFile } from "./utils/pdfUtils";
 import { ConfirmationModal } from "./components/CofirmationModal";
 
+type loadingStatus = {
+  isLoading: boolean;
+  actualSole: string;
+  percentual: number;
+}
+
 export function App() {
   const [value, setValue] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [registerSoleModalOpened, setRegisterSoleModalOpened] = useState(false);
   const [resetAllOrdersModalOpened, setResetAllOrdersModalOpened] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<loadingStatus>({
+    isLoading: false,
+    actualSole: "",
+    percentual: 0,
+  });
   const [soles, setSoles] = useState<Sole[]>([]);
 
   useEffect(() => {
@@ -27,16 +37,26 @@ export function App() {
   };
 
   const handleResetAllOrders = async () => {
-    setLoading(true);
+    setLoading((state) => ({...state, isLoading: true}));
     setSoles([]);
     setResetAllOrdersModalOpened(false);
 
+    const stepIncrement = 100/soles.length;
+
     for (const sole of soles) {
       await invoke("reset_orders", { id: sole.id });
+      setLoading((state) => ({...state, 
+        percentual: state.percentual + stepIncrement,
+        actualSole: sole.name
+      }));
     }
     
     refreshSoles();
-    setLoading(false);
+    setLoading((state) => ({
+      isLoading: false,
+      actualSole: "",
+      percentual: 0,
+    }));
   };
 
   async function printDocument() {
@@ -88,9 +108,11 @@ export function App() {
           </Grid>
         </Grid>
 
-        {loading ? (
+        {loading.isLoading ? (
           <ContainerLoading>
             <CircularProgress />
+            <p>{loading.percentual.toFixed(2)}%</p>
+            <p>Reiniciando pedidos do solado: {loading.actualSole}</p>
           </ContainerLoading>
         ) : (
           <>
